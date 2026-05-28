@@ -148,6 +148,29 @@ const authorizeRoles = (...roles) => {
         next();
     };
 };
+// Middleware to restrict access based on specific module permissions (SaaS logic)
+const checkPermission = (permission) => {
+    return (req, res, next) => {
+        if (!req.admin) {
+            return res.status(403).json({ success: false, message: "Not authorized as admin" });
+        }
+        
+        // Superadmin bypasses all permission checks
+        if (req.admin.role === "superadmin") {
+            return next();
+        }
+        
+        // Check if the admin has the specific permission
+        if (req.admin.permissions && req.admin.permissions.includes(permission)) {
+            return next();
+        }
+        
+        return res.status(403).json({
+            success: false,
+            message: `Permission denied: You do not have the '${permission}' permission`,
+        });
+    };
+};
 
 module.exports = {
     protectUser,
@@ -155,4 +178,5 @@ module.exports = {
     protectAdmin,
     protectAnyParticipant,
     authorizeRoles,
+    checkPermission,
 };

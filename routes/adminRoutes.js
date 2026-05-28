@@ -9,6 +9,7 @@ router.post("/login", adminController.loginAdmin);
 
 // Protected admin routes
 router.get("/profile", protectAdmin, adminController.getAdminProfile);
+router.put("/profile", protectAdmin, adminController.updateAdminProfile);
 router.patch("/change-password", protectAdmin, adminController.changePassword);
 
 // Example role-protected route (Super Admin only test)

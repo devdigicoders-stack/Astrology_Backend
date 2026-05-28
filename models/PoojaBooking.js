@@ -24,6 +24,10 @@ const PoojaBookingSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
+        address: {
+            type: String,
+            required: [true, "Address is required for pooja booking"],
+        },
         status: {
             type: String,
             enum: ["Pending", "Confirmed", "Completed", "Cancelled"],

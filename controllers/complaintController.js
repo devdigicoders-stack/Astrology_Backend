@@ -1,13 +1,9 @@
 const Complaint = require("../models/Complaint");
 const Astrologer = require("../models/Astrologer");
 
-// Helper: Check if Normal Admin owns the astrologer who submitted the complaint
+// Helper: Check if Normal Admin owns the astrologer who submitted the complaint (Removed SaaS isolation)
 const hasComplaintAccess = async (complaint, admin) => {
-    if (admin.role === "superadmin") return true;
-    if (complaint.submitterType === "user") return false; // Normal admins can't see user complaints
-
-    const astrologer = await Astrologer.findById(complaint.submitterId).select("createdBy");
-    return astrologer && astrologer.createdBy?.toString() === admin._id.toString();
+    return true;
 };
 
 // =========================================================
@@ -140,23 +136,10 @@ exports.getMyComplaintsByAstrologer = async (req, res) => {
 exports.getAllComplaintsAdmin = async (req, res) => {
     try {
         const { status, submitterType } = req.query;
-        const isSuperAdmin = req.admin.role === "superadmin";
-
         // Build filter
         const filter = {};
         if (status) filter.status = status;
-
-        if (!isSuperAdmin) {
-            // 🔒 Normal Admin: Sirf apni team ki complaints dekhega
-            const myAstrologers = await Astrologer.find({ createdBy: req.admin._id }).select("_id");
-            const myAstrologerIds = myAstrologers.map(a => a._id);
-
-            filter.submitterType = "astrologer";
-            filter.submitterId = { $in: myAstrologerIds };
-        } else {
-            // 👑 SuperAdmin: Sab dekhega (optional type filter)
-            if (submitterType) filter.submitterType = submitterType;
-        }
+        if (submitterType) filter.submitterType = submitterType;
 
         const complaints = await Complaint.find(filter)
             .populate("repliedBy", "name email role")

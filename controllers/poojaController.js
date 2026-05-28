@@ -60,6 +60,26 @@ exports.getAllPoojas = async (req, res) => {
     }
 };
 
+// @desc    Get all Pooja Services for Admin Panel (Isolated)
+// @route   GET /api/pooja/admin/all
+// @access  Private (Admin & SuperAdmin)
+exports.getAdminPoojas = async (req, res) => {
+    try {
+        let query = {};
+
+        const poojas = await Pooja.find(query).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: poojas.length,
+            poojas,
+        });
+    } catch (error) {
+        console.error("Get Admin Poojas Error:", error.message);
+        res.status(500).json({ success: false, message: "Failed to fetch pooja services" });
+    }
+};
+
 // @desc    Get Pooja by ID
 // @route   GET /api/pooja/:id
 // @access  Public / Private

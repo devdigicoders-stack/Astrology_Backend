@@ -182,10 +182,7 @@ exports.loginAstrologer = async (req, res) => {
 // @access  Private (Admins and Super Admins)
 exports.getAllAstrologers = async (req, res) => {
     try {
-        const isSuperAdmin = req.admin.role === "superadmin";
-
-        // SuperAdmin → sab dikhao | Normal Admin → sirf apni
-        const filter = isSuperAdmin ? {} : { createdBy: req.admin._id };
+        const filter = {};
 
         const astrologers = await Astrologer.find(filter)
             .populate("createdBy", "name email role")
@@ -211,15 +208,6 @@ exports.getAstrologerById = async (req, res) => {
             .populate("createdBy", "name email role");
         if (!astrologer) {
             return res.status(404).json({ success: false, message: "Astrologer not found" });
-        }
-
-        // Normal Admin → sirf apni astrologer dekh sakta hai
-        const isSuperAdmin = req.admin.role === "superadmin";
-        if (!isSuperAdmin && astrologer.createdBy?._id?.toString() !== req.admin._id.toString()) {
-            return res.status(403).json({
-                success: false,
-                message: "Access Denied: Ye astrologer aapne create nahi ki hai",
-            });
         }
 
         res.status(200).json({ success: true, astrologer });
@@ -267,15 +255,6 @@ exports.updateAstrologer = async (req, res) => {
         const astrologer = await Astrologer.findById(req.params.id);
         if (!astrologer) {
             return res.status(404).json({ success: false, message: "Astrologer not found" });
-        }
-
-        // Normal Admin → sirf apni astrologer update kar sakta hai
-        const isSuperAdmin = req.admin.role === "superadmin";
-        if (!isSuperAdmin && astrologer.createdBy?.toString() !== req.admin._id.toString()) {
-            return res.status(403).json({
-                success: false,
-                message: "Access Denied: Ye astrologer aapne create nahi ki hai",
-            });
         }
 
         // Check unique phoneNumber constraint
@@ -349,15 +328,6 @@ exports.toggleAstrologerVerification = async (req, res) => {
             return res.status(404).json({ success: false, message: "Astrologer not found" });
         }
 
-        // Normal Admin → sirf apni astrologer verify kar sakta hai
-        const isSuperAdmin = req.admin.role === "superadmin";
-        if (!isSuperAdmin && astrologer.createdBy?.toString() !== req.admin._id.toString()) {
-            return res.status(403).json({
-                success: false,
-                message: "Access Denied: Ye astrologer aapne create nahi ki hai",
-            });
-        }
-
         astrologer.isVerified = isVerified;
         await astrologer.save();
 
@@ -380,15 +350,6 @@ exports.deleteAstrologer = async (req, res) => {
         const astrologer = await Astrologer.findById(req.params.id);
         if (!astrologer) {
             return res.status(404).json({ success: false, message: "Astrologer not found" });
-        }
-
-        // Normal Admin → sirf apni astrologer delete kar sakta hai
-        const isSuperAdmin = req.admin.role === "superadmin";
-        if (!isSuperAdmin && astrologer.createdBy?.toString() !== req.admin._id.toString()) {
-            return res.status(403).json({
-                success: false,
-                message: "Access Denied: Ye astrologer aapne create nahi ki hai",
-            });
         }
 
         await Astrologer.findByIdAndDelete(req.params.id);

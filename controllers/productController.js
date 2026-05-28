@@ -74,6 +74,26 @@ exports.getAllProducts = async (req, res) => {
     }
 };
 
+// @desc    Get all products for Admin Panel (Isolated)
+// @route   GET /api/products/admin/all
+// @access  Private (Admin & SuperAdmin)
+exports.getAdminProducts = async (req, res) => {
+    try {
+        let query = {};
+
+        const products = await Product.find(query).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: products.length,
+            products,
+        });
+    } catch (error) {
+        console.error("Get Admin Products Error:", error.message);
+        res.status(500).json({ success: false, message: "Failed to fetch products" });
+    }
+};
+
 // @desc    Get single product by ID
 // @route   GET /api/products/:id
 // @access  Public

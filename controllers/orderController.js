@@ -179,12 +179,14 @@ exports.getMyOrders = async (req, res) => {
 
 // @desc    Get all orders
 // @route   GET /api/orders/admin
-// @access  Private (SuperAdmin Only)
+// @access  Private (Admin & SuperAdmin)
 exports.getAllOrders = async (req, res) => {
     try {
-        const orders = await Order.find()
+        let query = {};
+
+        const orders = await Order.find(query)
             .populate("user", "name phoneNumber email")
-            .populate("orderItems.product", "name")
+            .populate("orderItems.product", "name images category")
             .sort({ createdAt: -1 });
 
         res.status(200).json({
@@ -214,6 +216,9 @@ exports.updateOrderStatus = async (req, res) => {
         if (!order) {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
+
+        // Optional: Ensure admin has permission to edit this order (if they created the product inside)
+        // Sabhi Admins sab orders dekh/update kar sakte hain
 
         order.orderStatus = orderStatus;
         await order.save();

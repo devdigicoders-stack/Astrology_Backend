@@ -145,7 +145,7 @@ exports.getAllCarts = async (req, res) => {
     try {
         const carts = await Cart.find()
             .populate("user", "name email phoneNumber")
-            .populate("items.product", "name price category");
+            .populate("items.product", "name price category images");
 
         res.status(200).json({
             success: true,
@@ -155,5 +155,85 @@ exports.getAllCarts = async (req, res) => {
     } catch (error) {
         console.error("Get All Carts Error:", error.message);
         res.status(500).json({ success: false, message: "Failed to fetch all carts" });
+    }
+};
+
+// @desc    Get specific cart by ID (For SuperAdmin)
+// @route   GET /api/cart/admin/:id
+// @access  Private (SuperAdmin Only)
+exports.getCartByIdAdmin = async (req, res) => {
+    try {
+        const cart = await Cart.findById(req.params.id)
+            .populate("user", "name email phoneNumber")
+            .populate("items.product", "name price category images");
+
+        if (!cart) {
+            return res.status(404).json({ success: false, message: "Cart not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            cart,
+        });
+    } catch (error) {
+        console.error("Get Cart By ID Error:", error.message);
+        res.status(500).json({ success: false, message: "Failed to fetch cart details" });
+    }
+};
+
+// @desc    Delete a specific cart (For SuperAdmin)
+// @route   DELETE /api/cart/admin/:id
+// @access  Private (SuperAdmin Only)
+exports.deleteCartAdmin = async (req, res) => {
+    try {
+        const cart = await Cart.findById(req.params.id);
+
+        if (!cart) {
+            return res.status(404).json({ success: false, message: "Cart not found" });
+        }
+
+        await Cart.findByIdAndDelete(req.params.id);
+
+        res.status(200).json({
+            success: true,
+            message: "Cart deleted successfully",
+        });
+    } catch (error) {
+        console.error("Delete Cart Error:", error.message);
+        res.status(500).json({ success: false, message: "Failed to delete cart" });
+    }
+};
+
+// @desc    Toggle Cart Active/Inactive Status (For SuperAdmin)
+// @route   PATCH /api/cart/admin/:id/status
+// @access  Private (SuperAdmin Only)
+exports.toggleCartStatusAdmin = async (req, res) => {
+    try {
+        const { isActive } = req.body;
+
+        if (isActive === undefined) {
+            return res.status(400).json({
+                success: false,
+                message: "isActive field required hai (true ya false)",
+            });
+        }
+
+        const cart = await Cart.findById(req.params.id);
+
+        if (!cart) {
+            return res.status(404).json({ success: false, message: "Cart not found" });
+        }
+
+        cart.isActive = isActive;
+        await cart.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Cart ${isActive ? "Activate" : "Deactivate"} ho gaya!`,
+            cart,
+        });
+    } catch (error) {
+        console.error("Toggle Cart Status Error:", error.message);
+        res.status(500).json({ success: false, message: "Status update karne mein error aaya" });
     }
 };

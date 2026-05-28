@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const complaintController = require("../controllers/complaintController");
-const { protectAdmin, protectUser, protectAstrologer, authorizeRoles } = require("../middleware/authMiddleware");
+const { protectAdmin, protectUser, protectAstrologer, checkPermission } = require("../middleware/authMiddleware");
 
 // =========================================================
 // USER — Complaint Submit & Apni Complaints Dekho
@@ -18,10 +18,10 @@ router.get("/astrologer/my", protectAstrologer, complaintController.getMyComplai
 // =========================================================
 // ADMIN & SUPER ADMIN — Complaint Manage Karne Ki Routes
 // =========================================================
-router.get("/", protectAdmin, authorizeRoles("superadmin"), complaintController.getAllComplaintsAdmin);                // Sab dekho (filter: ?status=pending&submitterType=user)
-router.get("/:id", protectAdmin, authorizeRoles("superadmin"), complaintController.getComplaintByIdAdmin);            // ID se ek dekho
-router.put("/:id/reply", protectAdmin, authorizeRoles("superadmin"), complaintController.replyToComplaint);           // Reply / Edit reply
-router.patch("/:id/status", protectAdmin, authorizeRoles("superadmin"), complaintController.updateComplaintStatus);   // Status update karo
-router.delete("/:id", protectAdmin, authorizeRoles("superadmin"), complaintController.deleteComplaint);               // Delete karo
+router.get("/", protectAdmin, checkPermission("view_complaints"), complaintController.getAllComplaintsAdmin);                // Sab dekho (filter: ?status=pending&submitterType=user)
+router.get("/:id", protectAdmin, checkPermission("view_complaints"), complaintController.getComplaintByIdAdmin);            // ID se ek dekho
+router.put("/:id/reply", protectAdmin, checkPermission("edit_complaints"), complaintController.replyToComplaint);           // Reply / Edit reply
+router.patch("/:id/status", protectAdmin, checkPermission("edit_complaints"), complaintController.updateComplaintStatus);   // Status update karo
+router.delete("/:id", protectAdmin, checkPermission("delete_complaints"), complaintController.deleteComplaint);               // Delete karo
 
 module.exports = router;

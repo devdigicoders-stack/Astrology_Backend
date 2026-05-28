@@ -23,6 +23,22 @@ const AdminSchema = new mongoose.Schema(
             enum: ["admin", "superadmin"],
             default: "admin",
         },
+        permissions: {
+            type: [String],
+            enum: [
+                "view_astrologers", "create_astrologers", "edit_astrologers", "delete_astrologers", "verify_astrologers", "manage_commission",
+                "view_pooja", "create_pooja", "edit_pooja", "delete_pooja",
+                "view_products", "create_products", "edit_products", "delete_products",
+                "view_orders", "update_order_status",
+                "view_users", "edit_users", "delete_users", "manage_user_status",
+                "view_calls", "delete_calls",
+                "view_complaints", "edit_complaints", "delete_complaints",
+                "view_notifications", "create_notifications", "edit_notifications", "delete_notifications",
+                "view_pooja_bookings", "edit_pooja_bookings", "delete_pooja_bookings",
+                "view_carts", "edit_carts", "delete_carts"
+            ],
+            default: [],
+        },
         isActive: {
             type: Boolean,
             default: true,

@@ -23,6 +23,10 @@ const CartSchema = new mongoose.Schema(
             unique: true, // One cart per user
         },
         items: [CartItemSchema],
+        isActive: {
+            type: Boolean,
+            default: true,
+        },
     },
     {
         timestamps: true,

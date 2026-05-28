@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
-const { protectUser, protectAdmin, authorizeRoles } = require("../middleware/authMiddleware");
+const { protectUser, protectAdmin, checkPermission, authorizeRoles } = require("../middleware/authMiddleware");
+const upload = require("../middleware/uploadMiddleware");
 
 // Authentication routes for User/Customer
 router.post("/send-otp", userController.sendOTP);
@@ -15,13 +16,13 @@ router.get("/profile", protectUser, (req, res) => {
         user: req.user,
     });
 });
-router.put("/profile", protectUser, userController.updateProfile);
+router.put("/profile", protectUser, upload.single("profileImage"), userController.updateProfile);
 
-// Admin/Super-Admin User Management Routes (SUPERADMIN ONLY 🔒)
-router.get("/", protectAdmin, authorizeRoles("superadmin"), userController.getAllUsers);
-router.get("/:id", protectAdmin, authorizeRoles("superadmin"), userController.getUserById);
-router.put("/:id", protectAdmin, authorizeRoles("superadmin"), userController.updateUser);
-router.delete("/:id", protectAdmin, authorizeRoles("superadmin"), userController.deleteUser);
-router.patch("/:id/status", protectAdmin, authorizeRoles("superadmin"), userController.toggleUserStatus);
+// Admin User Management Routes (SaaS isolation applies here generally just by giving permission to see users)
+router.get("/", protectAdmin, checkPermission("view_users"), userController.getAllUsers);
+router.get("/:id", protectAdmin, checkPermission("view_users"), userController.getUserById);
+router.put("/:id", protectAdmin, checkPermission("edit_users"), upload.single("profileImage"), userController.updateUser);
+router.delete("/:id", protectAdmin, checkPermission("delete_users"), userController.deleteUser);
+router.patch("/:id/status", protectAdmin, checkPermission("manage_user_status"), userController.toggleUserStatus);
 
 module.exports = router;

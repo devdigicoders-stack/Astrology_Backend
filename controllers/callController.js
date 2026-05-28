@@ -264,10 +264,12 @@ exports.getCallById = async (req, res) => {
 
 // @desc    Get all call history (Admin)
 // @route   GET /api/calls/admin
-// @access  Private (Admin)
+// @access  Private (Admin & SuperAdmin)
 exports.getAllCallHistory = async (req, res) => {
     try {
-        const calls = await CallHistory.find()
+        let query = {};
+
+        const calls = await CallHistory.find(query)
             .populate("user", "name")
             .populate("astrologer", "name")
             .sort({ createdAt: -1 });
@@ -340,5 +342,25 @@ exports.generateAgoraToken = async (req, res) => {
     } catch (error) {
         console.error("Generate Agora Token Error:", error);
         res.status(500).json({ success: false, message: "Failed to generate token" });
+    }
+};
+
+// @desc    Delete a call history record (Admin)
+// @route   DELETE /api/calls/admin/:id
+// @access  Private (Admin)
+exports.deleteCallHistory = async (req, res) => {
+    try {
+        const call = await CallHistory.findById(req.params.id);
+
+        if (!call) {
+            return res.status(404).json({ success: false, message: "Call history not found" });
+        }
+
+        await call.deleteOne();
+
+        res.status(200).json({ success: true, message: "Call history deleted successfully" });
+    } catch (error) {
+        console.error("Delete Call History Error:", error);
+        res.status(500).json({ success: false, message: "Failed to delete call history" });
     }
 };

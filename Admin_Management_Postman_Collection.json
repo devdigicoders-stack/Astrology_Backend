@@ -1,0 +1,237 @@
+{
+  "info": {
+    "name": "Admin Management (SaaS Powers)",
+    "description": "Collection for all Super Admin operations including granular permission creation and Admin management.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Super Admin Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"super@admin.com\",\r\n  \"password\": \"password123\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/admin/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "admin",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. Create Normal Admin (With Granular Powers)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{YOUR_SUPER_ADMIN_TOKEN_HERE}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"name\": \"Data Entry Admin\",\r\n  \"email\": \"dataentry@admin.com\",\r\n  \"password\": \"password123\",\r\n  \"role\": \"admin\",\r\n  \"permissions\": [\r\n    \"view_astrologers\",\r\n    \"create_astrologers\",\r\n    \"view_pooja\",\r\n    \"create_pooja\"\r\n  ]\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/admin/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "admin",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Get All Admins",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{YOUR_SUPER_ADMIN_TOKEN_HERE}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/admin/all",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "admin",
+            "all"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. Get Admin By ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{YOUR_SUPER_ADMIN_TOKEN_HERE}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/admin/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "admin",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "REPLACE_WITH_ADMIN_ID"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. Update / Edit Admin",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{YOUR_SUPER_ADMIN_TOKEN_HERE}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"name\": \"Updated Admin Name\",\r\n  \"role\": \"admin\",\r\n  \"permissions\": [\r\n    \"view_astrologers\",\r\n    \"create_astrologers\",\r\n    \"delete_astrologers\"\r\n  ]\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/admin/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "admin",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "REPLACE_WITH_ADMIN_ID"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "6. Toggle Admin Status (Block/Unblock)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{YOUR_SUPER_ADMIN_TOKEN_HERE}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"isActive\": false\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/admin/:id/status",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "admin",
+            ":id",
+            "status"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "REPLACE_WITH_ADMIN_ID"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. Delete Admin",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{YOUR_SUPER_ADMIN_TOKEN_HERE}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/admin/:id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "5000",
+          "path": [
+            "api",
+            "admin",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "REPLACE_WITH_ADMIN_ID"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

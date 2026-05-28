@@ -19,16 +19,7 @@ exports.createNotification = async (req, res) => {
             });
         }
 
-        const isSuperAdmin = req.admin.role === "superadmin";
-        const audience = targetAudience || "all";
-
-        // 🔒 Normal Admin block - wo 'users' ya 'all' ko nahi bhej sakta
-        if (!isSuperAdmin && (audience === "users" || audience === "all")) {
-            return res.status(403).json({
-                success: false,
-                message: "Access Denied: Normal Admin sirf 'astrologers' ko notification bhej sakta hai. 'users' ya 'all' ko bhejna allowed nahi hai.",
-            });
-        }
+        // 🔒 Normal Admin block - wo 'users' ya 'all' ko nahi bhej sakta (Removed: Now all admins with access can send)
 
         const notification = await Notification.create({
             title,
@@ -104,15 +95,7 @@ exports.updateNotification = async (req, res) => {
             return res.status(404).json({ success: false, message: "Notification nahi mili" });
         }
 
-        const isSuperAdmin = req.admin.role === "superadmin";
-
-        // 🔒 Normal Admin ko block karo agar wo 'users' ya 'all' me update karna chahe
-        if (!isSuperAdmin && targetAudience && (targetAudience === "users" || targetAudience === "all")) {
-            return res.status(403).json({
-                success: false,
-                message: "Access Denied: Normal Admin sirf 'astrologers' ko notification bhej sakta hai. 'users' ya 'all' ko bhejna allowed nahi hai.",
-            });
-        }
+        // 🔒 Normal Admin ko block karo agar wo 'users' ya 'all' me update karna chahe (Removed)
 
         if (title !== undefined) notification.title = title;
         if (message !== undefined) notification.message = message;
@@ -223,21 +206,10 @@ exports.getNotificationsForUser = async (req, res) => {
 // @access  Private (Astrologer)
 exports.getNotificationsForAstrologer = async (req, res) => {
     try {
-        // 1. Get all SuperAdmins
-        const superAdmins = await Admin.find({ role: "superadmin" }).select("_id");
-        const superAdminIds = superAdmins.map(admin => admin._id);
-
-        // 2. Allowed creators: SuperAdmins + the Admin who created this astrologer
-        const allowedCreatorIds = [...superAdminIds];
-        if (req.astrologer.createdBy) {
-            allowedCreatorIds.push(req.astrologer.createdBy);
-        }
-
-        // 3. Fetch notifications matching the target audience AND allowed creators
+        // Fetch notifications matching the target audience
         const notifications = await Notification.find({
             isActive: true,
             targetAudience: { $in: ["all", "astrologers"] },
-            createdBy: { $in: allowedCreatorIds },
         }).sort({ createdAt: -1 });
 
         res.status(200).json({

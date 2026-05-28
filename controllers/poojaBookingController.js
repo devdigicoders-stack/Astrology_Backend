@@ -9,10 +9,10 @@ const Notification = require("../models/Notification");
 // @access  Private (User)
 exports.bookPooja = async (req, res) => {
     try {
-        const { poojaId, bookingDate, bookingTime } = req.body;
+        const { poojaId, bookingDate, bookingTime, address } = req.body;
 
-        if (!poojaId || !bookingDate || !bookingTime) {
-            return res.status(400).json({ success: false, message: "Please provide poojaId, bookingDate, and bookingTime" });
+        if (!poojaId || !bookingDate || !bookingTime || !address) {
+            return res.status(400).json({ success: false, message: "Please provide poojaId, bookingDate, bookingTime, and address" });
         }
 
         // 1. Check if Pooja exists and is active
@@ -52,6 +52,7 @@ exports.bookPooja = async (req, res) => {
             bookingDate,
             bookingTime,
             pricePaid: price,
+            address,
             status: "Confirmed",
         });
 
@@ -115,5 +116,60 @@ exports.getAllPoojaBookings = async (req, res) => {
     } catch (error) {
         console.error("Get All Pooja Bookings Error:", error.message);
         res.status(500).json({ success: false, message: "Failed to fetch bookings" });
+    }
+};
+
+// @desc    Update pooja booking status
+// @route   PUT /api/booking/pooja/:id/status
+// @access  Private (SuperAdmin Only)
+exports.updateBookingStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        
+        const validStatuses = ["Confirmed", "Completed", "Cancelled"];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ success: false, message: "Invalid booking status" });
+        }
+
+        const booking = await PoojaBooking.findByIdAndUpdate(
+            req.params.id,
+            { status },
+            { new: true }
+        );
+
+        if (!booking) {
+            return res.status(404).json({ success: false, message: "Booking not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Booking status updated to ${status}`,
+            booking,
+        });
+    } catch (error) {
+        console.error("Update Booking Status Error:", error.message);
+        res.status(500).json({ success: false, message: "Failed to update booking status" });
+    }
+};
+
+// @desc    Delete pooja booking
+// @route   DELETE /api/booking/pooja/:id
+// @access  Private (SuperAdmin Only)
+exports.deleteBooking = async (req, res) => {
+    try {
+        const booking = await PoojaBooking.findById(req.params.id);
+        if (!booking) {
+            return res.status(404).json({ success: false, message: "Booking not found" });
+        }
+
+        await booking.deleteOne();
+
+        res.status(200).json({
+            success: true,
+            message: "Booking deleted successfully"
+        });
+    } catch (error) {
+        console.error("Delete Booking Error:", error.message);
+        res.status(500).json({ success: false, message: "Failed to delete booking" });
     }
 };

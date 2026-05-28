@@ -15,7 +15,7 @@ const generateToken = (id, role) => {
 // @access  Public (Initial setup only) / Protected (Super Admin only after initial setup)
 exports.registerAdmin = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password, role, permissions } = req.body;
 
         if (!name || !email || !password) {
             return res.status(400).json({ success: false, message: "Please fill in all fields (name, email, password)" });
@@ -72,6 +72,7 @@ exports.registerAdmin = async (req, res) => {
             email,
             password, // Saved in plain text as per requirements
             role: finalRole,
+            permissions: permissions || [],
         });
 
         res.status(201).json({
@@ -82,6 +83,7 @@ exports.registerAdmin = async (req, res) => {
                 name: newAdmin.name,
                 email: newAdmin.email,
                 role: newAdmin.role,
+                permissions: newAdmin.permissions,
             },
         });
     } catch (error) {
@@ -129,6 +131,7 @@ exports.loginAdmin = async (req, res) => {
                 name: admin.name,
                 email: admin.email,
                 role: admin.role,
+                permissions: admin.permissions,
             },
         });
     } catch (error) {
@@ -150,6 +153,48 @@ exports.getAdminProfile = async (req, res) => {
     } catch (error) {
         console.error("Get Admin Profile Error:", error.message);
         res.status(500).json({ success: false, message: "Failed to get profile" });
+    }
+};
+
+// @desc    Update Admin's Own Profile
+// @route   PUT /api/admin/profile
+// @access  Private (Admins and Super Admins)
+exports.updateAdminProfile = async (req, res) => {
+    try {
+        const admin = await Admin.findById(req.admin._id);
+        if (!admin) {
+            return res.status(404).json({ success: false, message: "Admin not found" });
+        }
+
+        const { name, email } = req.body;
+
+        if (email && email !== admin.email) {
+            const emailExists = await Admin.findOne({ email });
+            if (emailExists) {
+                return res.status(400).json({ success: false, message: "Email is already in use by another admin" });
+            }
+            admin.email = email;
+        }
+
+        if (name) {
+            admin.name = name;
+        }
+
+        await admin.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            admin: {
+                id: admin._id,
+                name: admin.name,
+                email: admin.email,
+                role: admin.role,
+            },
+        });
+    } catch (error) {
+        console.error("Update Admin Profile Error:", error.message);
+        res.status(500).json({ success: false, message: "Failed to update profile" });
     }
 };
 
@@ -194,7 +239,7 @@ exports.getAdminById = async (req, res) => {
 // @access  Private (Super Admin only)
 exports.updateAdmin = async (req, res) => {
     try {
-        const { name, email, password, role, isActive } = req.body;
+        const { name, email, password, role, isActive, permissions } = req.body;
         const admin = await Admin.findById(req.params.id);
         
         if (!admin) {
@@ -214,6 +259,7 @@ exports.updateAdmin = async (req, res) => {
         if (role) admin.role = role;
         if (isActive !== undefined) admin.isActive = isActive;
         if (password) admin.password = password; // Stored in plain text
+        if (permissions !== undefined) admin.permissions = permissions;
 
         await admin.save();
 
@@ -225,6 +271,7 @@ exports.updateAdmin = async (req, res) => {
                 name: admin.name,
                 email: admin.email,
                 role: admin.role,
+                permissions: admin.permissions,
                 isActive: admin.isActive,
             },
         });

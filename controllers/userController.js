@@ -134,6 +134,10 @@ exports.updateProfile = async (req, res) => {
         if (timeOfBirth !== undefined) user.timeOfBirth = timeOfBirth;
         if (placeOfBirth !== undefined) user.placeOfBirth = placeOfBirth;
 
+        if (req.file) {
+            user.profileImage = req.file.filename;
+        }
+
         await user.save();
 
         res.status(200).json({
@@ -227,6 +231,10 @@ exports.updateUser = async (req, res) => {
         if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth;
         if (timeOfBirth !== undefined) user.timeOfBirth = timeOfBirth;
         if (placeOfBirth !== undefined) user.placeOfBirth = placeOfBirth;
+
+        if (req.file) {
+            user.profileImage = req.file.filename;
+        }
 
         await user.save();
 
