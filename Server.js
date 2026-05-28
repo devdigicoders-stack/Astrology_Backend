@@ -19,6 +19,7 @@ const cartRoutes = require("./routes/cartRoutes");
 const callRoutes = require("./routes/callRoutes");
 
 const chatRoutes = require("./routes/chatRoutes");
+const aiChatRoutes = require("./routes/aiChatRoutes");
 
 const app = express();
 const server = http.createServer(app);
@@ -64,6 +65,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/calls", callRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/ai-chat", aiChatRoutes);
 
 app.get("/", (req, res) => {
     res.send("API Running Vivek Start Project ");

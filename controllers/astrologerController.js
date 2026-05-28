@@ -460,7 +460,7 @@ exports.updateAvailabilityStatus = async (req, res) => {
 exports.getPublicAstrologers = async (req, res) => {
     try {
         // Query Object: Start with only verified AND ONLY ONLINE astrologers
-        let query = { isVerified: true, availability: "online" };
+        let query = { isVerified: true }; // Temporarily showing all verified astrologers, not just online
 
         // 1. Filter by Expertise (Vedic, Tarot, etc.)
         if (req.query.expertise) {
@@ -506,7 +506,7 @@ exports.getPublicAstrologers = async (req, res) => {
 // @access  Public
 exports.getPublicAstrologerById = async (req, res) => {
     try {
-        const astrologer = await Astrologer.findOne({ _id: req.params.id, isVerified: true, availability: "online" })
+        const astrologer = await Astrologer.findOne({ _id: req.params.id, isVerified: true })
             .select("-bankDetails -commissionPercentage -commissionSetBySuperAdmin -createdBy -password -walletBalance");
 
         if (!astrologer) {

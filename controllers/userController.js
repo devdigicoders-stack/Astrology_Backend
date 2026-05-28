@@ -58,9 +58,9 @@ exports.verifyOTPUser = async (req, res) => {
             return res.status(400).json({ success: false, message: "Please enter a valid 10-digit phone number" });
         }
 
-        // Mock verification check
-        if (otp !== "123456" && (otp.length !== 6 || isNaN(otp))) {
-            return res.status(400).json({ success: false, message: "Invalid OTP" });
+        // Strict Mock verification check (Only 123456 is allowed for testing)
+        if (otp !== "123456") {
+            return res.status(400).json({ success: false, message: "Invalid OTP. Please use the testing OTP (123456)." });
         }
 
         let user = await User.findOne({ phoneNumber });

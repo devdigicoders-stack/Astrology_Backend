@@ -1,0 +1,96 @@
+{
+	"info": {
+		"_postman_id": "b3f0e8f0-1a1a-4a2a-b2b2-c2c2d2d2e2e2",
+		"name": "Astrology App Auth APIs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Send OTP (Login/Register)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"phoneNumber\": \"9999999999\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/user/send-otp",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"user",
+						"send-otp"
+					]
+				}
+			}
+		},
+		{
+			"name": "2. Verify OTP (Registration)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"phoneNumber\": \"9999999999\",\r\n    \"otp\": \"123456\",\r\n    \"name\": \"Vivek\",\r\n    \"email\": \"vivek@test.com\",\r\n    \"gender\": \"Male\",\r\n    \"dateOfBirth\": \"12/09/2003\",\r\n    \"placeOfBirth\": \"Mirzapur\",\r\n    \"timeOfBirth\": \"14:30\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/user/verify-otp",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"user",
+						"verify-otp"
+					]
+				}
+			}
+		},
+		{
+			"name": "2. Verify OTP (Login for existing user)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"phoneNumber\": \"9999999999\",\r\n    \"otp\": \"123456\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/user/verify-otp",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"user",
+						"verify-otp"
+					]
+				}
+			}
+		}
+	]
+}

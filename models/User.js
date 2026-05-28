@@ -27,6 +27,14 @@ const UserSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        freeAIChatLimit: {
+            type: Number,
+            default: 5, // 5 free messages limit
+        },
+        usedAIChatCount: {
+            type: Number,
+            default: 0,
+        },
         gender: {
             type: String,
             enum: ["Male", "Female", "Other", ""],
@@ -43,6 +51,14 @@ const UserSchema = new mongoose.Schema(
         placeOfBirth: {
             type: String,
             default: "",
+        },
+        freeAIChatLimit: {
+            type: Number,
+            default: 5, // 5 free messages for testing
+        },
+        usedAIChatCount: {
+            type: Number,
+            default: 0,
         },
         isActive: {
             type: Boolean,
