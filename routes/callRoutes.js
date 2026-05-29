@@ -1,21 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const callController = require("../controllers/callController");
-const { protectUser, protectAstrologer, protectAdmin, checkPermission, authorizeRoles } = require("../middleware/authMiddleware");
-
-// Custom middleware to allow either User OR Astrologer (or Admin) to access the route
-const protectAnyParticipant = (req, res, next) => {
-    protectUser(req, res, (err) => {
-        if (!err && req.user) return next();
-        protectAstrologer(req, res, (err2) => {
-            if (!err2 && req.astrologer) return next();
-            protectAdmin(req, res, (err3) => {
-                if (!err3 && req.admin) return next();
-                return res.status(401).json({ success: false, message: "Not authorized" });
-            });
-        });
-    });
-};
+const { protectUser, protectAstrologer, protectAdmin, checkPermission, authorizeRoles, protectAnyParticipant } = require("../middleware/authMiddleware");
 
 router.post("/initiate", protectUser, callController.initiateCall);
 router.post("/end", protectAnyParticipant, callController.endCall);

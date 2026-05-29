@@ -28,8 +28,16 @@ exports.getChatMessages = async (req, res) => {
             }
         }
 
-        // Fetch all messages for this callId, sorted by oldest first
-        const messages = await ChatMessage.find({ callId }).sort({ createdAt: 1 });
+        // Fetch all historical messages between this User and this Astrologer
+        const userId = callRecord.user.toString();
+        const astrologerId = callRecord.astrologer.toString();
+
+        const messages = await ChatMessage.find({
+            $or: [
+                { senderId: userId, receiverId: astrologerId },
+                { senderId: astrologerId, receiverId: userId }
+            ]
+        }).sort({ createdAt: 1 });
 
         res.status(200).json({ success: true, count: messages.length, messages });
     } catch (error) {

@@ -20,33 +20,52 @@ exports.initSocket = (io) => {
         // 1. Start Timer Event (Called by frontend AFTER API accept returns success)
         socket.on("start_timer", async (data) => {
             const { callId } = data;
-            
+            console.log("start_timer received for call:", callId);
+
             try {
+                if (!callId) {
+                    console.log("start_timer error: No callId provided");
+                    return;
+                }
+
+                // Check if timer already exists for this call to avoid duplicate timers!
+                if (activeCalls.has(callId.toString())) {
+                    console.log("Timer already running for call:", callId);
+                    return;
+                }
+
                 // Fetch the call record
                 const callRecord = await CallHistory.findById(callId);
-                if (!callRecord || callRecord.status !== "ongoing") {
+                if (!callRecord) {
+                    console.log("start_timer error: Call not found");
+                    return socket.emit("call_error", { message: "Call not found." });
+                }
+                if (callRecord.status !== "ongoing") {
+                    console.log("start_timer error: Call status is not ongoing, it is:", callRecord.status);
                     return socket.emit("call_error", { message: "Call is not ongoing. Please accept via API first." });
                 }
-                
+
                 // Fetch user and astrologer
                 const user = await User.findById(callRecord.user);
                 const astrologer = await Astrologer.findById(callRecord.astrologer);
-                
+
                 if (!user || !astrologer) {
                     return socket.emit("call_error", { message: "Invalid user or astrologer" });
                 }
 
-                // Get per minute rate based on call type
+                // Get per minute rate based on call type safely
                 const type = callRecord.type;
                 let perMinuteRate = 0;
-                if (type === "chat") perMinuteRate = astrologer.pricing.chatRate || 0;
-                else if (type === "audio") perMinuteRate = astrologer.pricing.audioCallRate || 0;
-                else if (type === "video") perMinuteRate = astrologer.pricing.videoCallRate || 0;
+                if (astrologer.pricing) {
+                    if (type === "chat") perMinuteRate = astrologer.pricing.chatRate || 0;
+                    else if (type === "audio") perMinuteRate = astrologer.pricing.audioCallRate || 0;
+                    else if (type === "video") perMinuteRate = astrologer.pricing.videoCallRate || 0;
+                }
 
                 // Create a room for this call so both can join
                 const roomName = `call_${callRecord._id}`;
-                socket.join(roomName); 
-                
+                socket.join(roomName);
+
                 // Inform clients that timer started
                 io.to(roomName).emit("timer_started", { message: "Live billing timer started." });
 
@@ -59,6 +78,7 @@ exports.initSocket = (io) => {
                 }, 60000); // 60,000 ms = 1 minute
 
                 activeCalls.set(callRecord._id.toString(), timerId);
+                console.log("Timer successfully started for call:", callId);
 
             } catch (error) {
                 console.error("Start Timer Socket Error:", error);
@@ -67,7 +87,7 @@ exports.initSocket = (io) => {
         });
 
         // Removed socket.on("end_call") since it is now an API route
-        
+
         socket.on("disconnect", () => {
             console.log("Client disconnected:", socket.id);
             // Ideally handle sudden disconnects if they are in an active call
@@ -77,6 +97,9 @@ exports.initSocket = (io) => {
 
 // Function to handle the per-minute deduction logic
 async function handleMinuteTick(callId, userId, astrologerId, perMinuteRate, io) {
+    const userRoom = userId.toString();
+    const astroRoom = astrologerId.toString();
+
     try {
         const user = await User.findById(userId);
         const astrologer = await Astrologer.findById(astrologerId);
@@ -99,8 +122,8 @@ async function handleMinuteTick(callId, userId, astrologerId, perMinuteRate, io)
         if (deductionAmount > 0) {
             if (user.walletBalance < deductionAmount) {
                 // Insufficient funds, disconnect the call immediately
-                io.to(userId).emit("force_disconnect", { message: "Insufficient balance. Call ended." });
-                io.to(astrologerId).emit("force_disconnect", { message: "User balance empty. Call ended." });
+                io.to(userRoom).emit("force_disconnect", { message: "Insufficient balance. Call ended." });
+                io.to(astroRoom).emit("force_disconnect", { message: "User balance empty. Call ended." });
                 return await finishCall(callId, "disconnected", io);
             }
 
@@ -133,11 +156,11 @@ async function handleMinuteTick(callId, userId, astrologerId, perMinuteRate, io)
 
         // Send low balance warning if user has only 1 minute left
         if (user.walletBalance >= 0 && user.walletBalance < (perMinuteRate * 2) && deductionAmount > 0) {
-            io.to(userId).emit("low_balance_warning", { message: "Low balance. Call will disconnect soon." });
+            io.to(userRoom).emit("low_balance_warning", { message: "Low balance. Call will disconnect soon." });
         }
 
         // Update live balance on frontend
-        io.to(userId).emit("balance_update", { walletBalance: user.walletBalance });
+        io.to(userRoom).emit("balance_update", { walletBalance: user.walletBalance });
 
     } catch (error) {
         console.error("Minute Tick Error:", error);

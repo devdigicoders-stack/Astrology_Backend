@@ -423,11 +423,11 @@ exports.setGlobalAstrologerCommission = async (req, res) => {
 exports.updateAvailabilityStatus = async (req, res) => {
     try {
         const { availability } = req.body;
-        
+
         if (!['online', 'offline', 'busy'].includes(availability)) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Invalid status. Allowed values: online, offline, busy" 
+            return res.status(400).json({
+                success: false,
+                message: "Invalid status. Allowed values: online, offline, busy"
             });
         }
 

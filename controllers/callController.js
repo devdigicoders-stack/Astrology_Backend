@@ -109,7 +109,7 @@ exports.acceptCall = async (req, res) => {
 
         // Inform user via WebSocket that call is accepted
         const io = req.app.get("io");
-        io.to(callRecord.user.toString()).emit("call_accepted", { callId: callRecord._id, message: "Astrologer accepted! Connected." });
+        io.to(callRecord.user.toString()).emit("call_accepted", { callId: callRecord._id, type: callRecord.type, message: "Astrologer accepted! Connected." });
 
         // NOTE: The frontend should now tell socket server to start the timer by calling the start_timer event.
 
