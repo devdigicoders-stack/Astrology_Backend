@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Environment Variables - KABHI GITHUB PE MAT DAALO
+.env
+.env.local
+.env.development
+.env.production
+
+# Uploads folder
+uploads/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
