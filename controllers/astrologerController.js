@@ -483,7 +483,10 @@ exports.getPublicAstrologers = async (req, res) => {
             query["pricing.chatRate"] = { $lte: Number(req.query.maxCharge) };
         }
 
-        // 3. Removed status filter since we strictly only show "online" now.
+        // 5. Filter by Availability (online/offline/busy)
+        if (req.query.availability) {
+            query.availability = req.query.availability;
+        }
 
         // Fetch astrologers excluding secret fields (like bank details, commission, createdBy, walletBalance)
         const astrologers = await Astrologer.find(query)

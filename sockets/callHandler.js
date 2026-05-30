@@ -3,6 +3,7 @@ const ChatMessage = require("../models/ChatMessage");
 const User = require("../models/User");
 const Astrologer = require("../models/Astrologer");
 const Admin = require("../models/Admin");
+const { saveTransaction } = require("../controllers/transactionController");
 
 // A map to store active call timers so we can clear them easily
 const activeCalls = new Map();
@@ -128,8 +129,10 @@ async function handleMinuteTick(callId, userId, astrologerId, perMinuteRate, io)
             }
 
             // Deduct from User
+            const balanceBefore = user.walletBalance;
             user.walletBalance -= deductionAmount;
             await user.save();
+
 
             // Distribute to Astrologer and SuperAdmin
             const commissionPercent = astrologer.commissionPercentage || 0;
@@ -181,6 +184,24 @@ const finishCall = async (callId, status, io) => {
             callRecord.status = status;
             callRecord.endTime = Date.now();
             await callRecord.save();
+
+            // Save ONE consolidated transaction record for the entire call
+            if (callRecord.totalCost > 0) {
+                const user = await User.findById(callRecord.user);
+                if (user) {
+                    await saveTransaction({
+                        userId: user._id,
+                        type: "call_deduction",
+                        amount: callRecord.totalCost,
+                        direction: "debit",
+                        balanceBefore: user.walletBalance + callRecord.totalCost,
+                        balanceAfter: user.walletBalance,
+                        description: `${callRecord.type.charAt(0).toUpperCase() + callRecord.type.slice(1)} call charge — ${callRecord.totalDurationMinutes} min total`,
+                        callId: callRecord._id,
+                        doneBy: "system",
+                    });
+                }
+            }
 
             // Set astrologer back to online
             if (callRecord.astrologer) {

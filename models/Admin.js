@@ -35,7 +35,10 @@ const AdminSchema = new mongoose.Schema(
                 "view_complaints", "edit_complaints", "delete_complaints",
                 "view_notifications", "create_notifications", "edit_notifications", "delete_notifications",
                 "view_pooja_bookings", "edit_pooja_bookings", "delete_pooja_bookings",
-                "view_carts", "edit_carts", "delete_carts"
+                "view_carts", "edit_carts", "delete_carts",
+                "view_transactions", "delete_transactions", "recharge_wallet",
+                "view_withdrawals", "manage_withdrawals",
+                "view_dashboard"
             ],
             default: [],
         },
@@ -46,6 +49,10 @@ const AdminSchema = new mongoose.Schema(
         walletBalance: {
             type: Number,
             default: 0, // Platform ki total commission kamayi yahaan store hogi
+        },
+        totalRechargeMoney: {
+            type: Number,
+            default: 0, // Razorpay se aane wala total recharge amount
         },
     },
     {

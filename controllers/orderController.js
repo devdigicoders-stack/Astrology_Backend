@@ -1,5 +1,6 @@
 const Order = require("../models/Order");
 const Product = require("../models/Product");
+const { saveTransaction } = require("./transactionController");
 
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
@@ -144,6 +145,19 @@ exports.verifyAndCreateOrder = async (req, res) => {
             superAdmin.walletBalance += totalAmount;
             await superAdmin.save();
         }
+
+        // Save Transaction record for User
+        await saveTransaction({
+            userId: req.user._id,
+            type: "product_purchase",
+            amount: totalAmount,
+            direction: "debit",
+            balanceBefore: totalAmount, // Razorpay payment — wallet se nahi gaya, card se gaya
+            balanceAfter: totalAmount,
+            description: `Product purchase — ₹${totalAmount} paid via Razorpay`,
+            orderId: order._id,
+            doneBy: "system",
+        });
 
         res.status(201).json({
             success: true,

@@ -65,6 +65,7 @@ exports.initiateCall = async (req, res) => {
                 checkCall.status = "rejected";
                 await checkCall.save();
                 io.to(user._id.toString()).emit("call_rejected", { message: "Astrologer did not answer. Call rejected." });
+                io.to(astrologer._id.toString()).emit("call_rejected", { message: "Call auto-rejected due to timeout." });
             }
         }, 60000); // 60 seconds
 

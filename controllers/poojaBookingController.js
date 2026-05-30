@@ -3,6 +3,7 @@ const Pooja = require("../models/Pooja");
 const User = require("../models/User");
 const Admin = require("../models/Admin");
 const Notification = require("../models/Notification");
+const { saveTransaction } = require("./transactionController");
 
 // @desc    Book a Pooja and deduct wallet balance
 // @route   POST /api/booking/pooja
@@ -39,6 +40,7 @@ exports.bookPooja = async (req, res) => {
         }
 
         // 4. Perform Wallet Transaction (Deduct from User, Add to SuperAdmin)
+        const balanceBefore = user.walletBalance;
         user.walletBalance -= price;
         superAdmin.walletBalance += price;
 
@@ -62,7 +64,20 @@ exports.bookPooja = async (req, res) => {
             message: `Your booking for ${pooja.name} on ${bookingDate} at ${bookingTime} is confirmed. ₹${price} has been deducted from your wallet.`,
             targetAudience: "users",
             type: "alert",
-            createdBy: superAdmin._id // Using superadmin as the creator of system notification
+            createdBy: superAdmin._id
+        });
+
+        // 7. Save Transaction Record
+        await saveTransaction({
+            userId: user._id,
+            type: "pooja_booking",
+            amount: price,
+            direction: "debit",
+            balanceBefore,
+            balanceAfter: user.walletBalance,
+            description: `Pooja booked: ${pooja.name} on ${bookingDate}`,
+            poojaBookingId: booking._id,
+            doneBy: "system",
         });
 
         res.status(201).json({

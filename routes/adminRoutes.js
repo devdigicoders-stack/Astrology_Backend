@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/adminController");
 const { protectAdmin, authorizeRoles } = require("../middleware/authMiddleware");
+const appSettingsController = require("../controllers/appSettingsController");
 
 // Public admin routes
 router.post("/register", adminController.registerAdmin);
@@ -20,6 +21,10 @@ router.get("/super-only-test", protectAdmin, authorizeRoles("superadmin"), (req,
         admin: req.admin,
     });
 });
+
+// Settings (MUST BE BEFORE /:id routes to avoid routing conflicts)
+router.get("/settings", protectAdmin, appSettingsController.getSettings);
+router.put("/settings", protectAdmin, authorizeRoles("superadmin"), appSettingsController.updateSettings);
 
 // Manage Admins (Super Admin only endpoints)
 router.get("/all", protectAdmin, authorizeRoles("superadmin"), adminController.getAllAdmins);

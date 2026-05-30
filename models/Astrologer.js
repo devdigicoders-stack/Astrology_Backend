@@ -75,6 +75,16 @@ const AstrologerSchema = new mongoose.Schema(
             type: Number, // Total earnings they can withdraw
             default: 0,
         },
+        averageRating: {
+            type: Number,
+            default: 0,
+            min: [0, "Rating cannot be below 0"],
+            max: [5, "Rating cannot exceed 5"],
+        },
+        totalReviews: {
+            type: Number,
+            default: 0,
+        },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Admin", // Kis admin ne create kiya

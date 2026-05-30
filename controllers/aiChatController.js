@@ -6,7 +6,9 @@ const crypto = require("crypto");
 // Initialize Gemini (User must set GEMINI_API_KEY in .env)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "YOUR_TEST_API_KEY");
 
-const PAID_MESSAGE_PRICE = 5; // e.g., ₹5 per message
+const AppSettings = require("../models/AppSettings");
+const Transaction = require("../models/Transaction");
+const Admin = require("../models/Admin");
 
 exports.chatWithAI = async (req, res) => {
     try {
@@ -37,22 +39,47 @@ exports.chatWithAI = async (req, res) => {
         let isPaid = false;
         let cost = 0;
 
+        // Fetch Dynamic Rate
+        let settings = await AppSettings.findOne();
+        let currentRate = settings ? settings.aiChatRate : 5;
+
         // Check Limits
         if (user.freeAIChatLimit > 0) {
             user.freeAIChatLimit -= 1;
             user.usedAIChatCount += 1;
         } else {
             // Free limit over, check wallet
-            if (user.walletBalance < PAID_MESSAGE_PRICE) {
+            if (user.walletBalance < currentRate) {
                 return res.status(402).json({
                     success: false,
                     message: "Insufficient wallet balance. Please recharge to continue talking to AI Astrologer."
                 });
             }
-            user.walletBalance -= PAID_MESSAGE_PRICE;
+
+            const balanceBefore = user.walletBalance;
+            user.walletBalance -= currentRate;
             user.usedAIChatCount += 1;
             isPaid = true;
-            cost = PAID_MESSAGE_PRICE;
+            cost = currentRate;
+
+            // Create Transaction record for User
+            await Transaction.create({
+                user: userId,
+                type: "ai_chat",
+                amount: currentRate,
+                direction: "debit",
+                balanceBefore: balanceBefore,
+                balanceAfter: user.walletBalance,
+                description: `AI Astrologer Chat charge - ₹${currentRate}`,
+                doneBy: "system"
+            });
+
+            // Add money to Super Admin wallet (Platform earnings)
+            const superAdmin = await Admin.findOne({ role: "superadmin" });
+            if (superAdmin) {
+                superAdmin.walletBalance += currentRate;
+                await superAdmin.save();
+            }
         }
 
         // Construct User Context from DB
