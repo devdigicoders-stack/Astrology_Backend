@@ -17,6 +17,8 @@ const TransactionSchema = new mongoose.Schema(
                 "refund",            // Refund mila
                 "kundali_generation", // Kundali generate karne pe deduction
                 "ai_chat",           // AI Astrologer Chat deduction
+                "daily_horoscope",   // Daily Horoscope check
+                "weekly_horoscope",  // Weekly Horoscope check
             ],
             required: true,
         },

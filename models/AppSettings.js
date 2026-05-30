@@ -17,6 +17,18 @@ const AppSettingsSchema = new mongoose.Schema(
             type: Number,
             default: 5, // Default: ₹5 per message
         },
+
+        // Daily Horoscope charge
+        dailyHoroscopeRate: {
+            type: Number,
+            default: 2, // Default: ₹2 per check
+        },
+
+        // Weekly Horoscope charge
+        weeklyHoroscopeRate: {
+            type: Number,
+            default: 5, // Default: ₹5 per check
+        },
     },
     {
         timestamps: true,

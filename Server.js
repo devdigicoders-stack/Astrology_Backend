@@ -26,6 +26,7 @@ const kundaliRoutes = require("./routes/kundaliRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const withdrawalRoutes = require("./routes/withdrawalRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const horoscopeRoutes = require("./routes/horoscopeRoutes");
 
 const app = express();
 const server = http.createServer(app);
@@ -78,6 +79,7 @@ app.use("/api/kundali", kundaliRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/withdrawals", withdrawalRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/horoscope", horoscopeRoutes);
 
 app.get("/", (req, res) => {
     res.send("API Running Vivek Start Project ");

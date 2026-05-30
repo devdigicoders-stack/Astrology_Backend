@@ -60,6 +60,7 @@ exports.getDashboardStats = async (req, res) => {
             recentTransactions,
             aiChatRevenueData,
             kundaliRevenueData,
+            horoscopeRevenueData,
             totalNotifications,
             recentNotifications
         ] = await Promise.all([
@@ -142,6 +143,12 @@ exports.getDashboardStats = async (req, res) => {
                 { $group: { _id: null, totalVolume: { $sum: "$amount" } } }
             ]),
             
+            // Total Horoscope Revenue
+            Transaction.aggregate([
+                { $match: { type: { $in: ["daily_horoscope", "weekly_horoscope"] }, direction: "debit" } },
+                { $group: { _id: null, totalVolume: { $sum: "$amount" } } }
+            ]),
+            
             // Notifications Data
             Notification.countDocuments({ isActive: true }),
             Notification.find({ isActive: true }).sort({ createdAt: -1 }).limit(5)
@@ -155,6 +162,7 @@ exports.getDashboardStats = async (req, res) => {
         const totalAstrologerCallEarnings = callEarningsData.length > 0 ? callEarningsData[0].astrologerEarnings : 0;
         const aiChatRevenue = aiChatRevenueData.length > 0 ? aiChatRevenueData[0].totalVolume : 0;
         const kundaliRevenue = kundaliRevenueData.length > 0 ? kundaliRevenueData[0].totalVolume : 0;
+        const horoscopeRevenue = horoscopeRevenueData.length > 0 ? horoscopeRevenueData[0].totalVolume : 0;
         
         const approvedWithdrawalsSum = approvedWithdrawalVolume.length > 0 ? approvedWithdrawalVolume[0].totalVolume : 0;
         const pendingWithdrawalsSum = pendingWithdrawalVolume.length > 0 ? pendingWithdrawalVolume[0].totalVolume : 0;
@@ -195,6 +203,7 @@ exports.getDashboardStats = async (req, res) => {
                     totalAstrologerCallEarnings,
                     aiChatRevenue,
                     kundaliRevenue,
+                    horoscopeRevenue,
                     totalReviews
                 },
                 financials: {

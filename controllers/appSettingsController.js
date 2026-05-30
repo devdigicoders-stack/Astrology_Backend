@@ -7,7 +7,7 @@ exports.getSettings = async (req, res) => {
     try {
         let settings = await AppSettings.findOne();
         if (!settings) {
-            settings = await AppSettings.create({ kundaliRate: 10, aiChatRate: 5 });
+            settings = await AppSettings.create({ kundaliRate: 10, aiChatRate: 5, dailyHoroscopeRate: 2, weeklyHoroscopeRate: 5 });
         }
         res.status(200).json({ success: true, settings });
     } catch (error) {
@@ -21,11 +21,11 @@ exports.getSettings = async (req, res) => {
 // @access  Private (Superadmin only)
 exports.updateSettings = async (req, res) => {
     try {
-        const { kundaliRate, aiChatRate } = req.body;
+        const { kundaliRate, aiChatRate, dailyHoroscopeRate, weeklyHoroscopeRate } = req.body;
         
         let settings = await AppSettings.findOne();
         if (!settings) {
-            settings = await AppSettings.create({ kundaliRate: 10, aiChatRate: 5 });
+            settings = await AppSettings.create({ kundaliRate: 10, aiChatRate: 5, dailyHoroscopeRate: 2, weeklyHoroscopeRate: 5 });
         }
 
         if (kundaliRate !== undefined) {
@@ -34,6 +34,14 @@ exports.updateSettings = async (req, res) => {
         
         if (aiChatRate !== undefined) {
             settings.aiChatRate = aiChatRate;
+        }
+
+        if (dailyHoroscopeRate !== undefined) {
+            settings.dailyHoroscopeRate = dailyHoroscopeRate;
+        }
+
+        if (weeklyHoroscopeRate !== undefined) {
+            settings.weeklyHoroscopeRate = weeklyHoroscopeRate;
         }
 
         await settings.save();
