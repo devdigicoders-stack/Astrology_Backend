@@ -94,6 +94,7 @@ exports.verifyOTPUser = async (req, res) => {
                 dateOfBirth: dateOfBirth || "",
                 timeOfBirth: timeOfBirth || "",
                 placeOfBirth: placeOfBirth || "",
+                profileImage: req.file ? req.file.filename : "",
             });
         }
 
@@ -111,7 +112,7 @@ exports.verifyOTPUser = async (req, res) => {
         });
     } catch (error) {
         console.error("User Verify OTP Error:", error.message);
-        res.status(500).json({ success: false, message: "Verification failed" });
+        res.status(500).json({ success: false, message: "Verification failed: " + error.message });
     }
 };
 

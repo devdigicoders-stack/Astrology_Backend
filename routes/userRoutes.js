@@ -6,7 +6,7 @@ const upload = require("../middleware/uploadMiddleware");
 
 // Authentication routes for User/Customer
 router.post("/send-otp", userController.sendOTP);
-router.post("/verify-otp", userController.verifyOTPUser);
+router.post("/verify-otp", upload.single("profileImage"), userController.verifyOTPUser);
 
 // Protected routes for User/Customer
 router.get("/profile", protectUser, (req, res) => {
