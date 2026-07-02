@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node Server.js",
     "build": "echo 'No build required'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
