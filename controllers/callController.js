@@ -337,7 +337,8 @@ exports.generateAgoraToken = async (req, res) => {
             success: true,
             token,
             channelName,
-            accountId
+            accountId,
+            appId // Sending App ID to frontend dynamically
         });
 
     } catch (error) {
