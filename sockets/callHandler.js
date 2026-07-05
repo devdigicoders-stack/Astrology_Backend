@@ -111,6 +111,18 @@ exports.initSocket = (io) => {
             }
         });
 
+        // Typing indicator
+        socket.on("typing", (data) => {
+            const { receiverId, isTyping, callId } = data;
+            if (receiverId) {
+                io.to(receiverId.toString()).emit("typing", {
+                    senderId: socket.userId,
+                    isTyping,
+                    callId
+                });
+            }
+        });
+
         // Removed socket.on("end_call") since it is now an API route
 
         socket.on("disconnect", () => {
