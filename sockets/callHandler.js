@@ -9,10 +9,34 @@ const { saveTransaction } = require("../controllers/transactionController");
 const activeCalls = new Map();
 
 exports.initSocket = (io) => {
+    // Middleware to extract user ID from token and attach it to socket
+    io.use((socket, next) => {
+        const token = socket.handshake.auth?.token || socket.handshake.query?.token;
+        if (token) {
+            try {
+                const jwt = require("jsonwebtoken");
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback_secret_key");
+                socket.userId = decoded.id;
+                console.log("Socket Auth Success: User ID extracted:", socket.userId);
+            } catch (err) {
+                console.log("Socket JWT Verification Error:", err.message);
+            }
+        }
+        next();
+    });
+
     io.on("connection", (socket) => {
         console.log("New client connected to Socket.io:", socket.id);
 
-        // Client can join a room using their user/astrologer ID
+        // Auto-join room using decoded userId
+        if (socket.userId) {
+            socket.join(socket.userId);
+            console.log(`[SOCKET SUCCESS] User/Astrologer ${socket.userId} auto-joined their personal room.`);
+        } else {
+            console.log(`[SOCKET WARNING] Client connected without a valid userId. They won't receive private events.`);
+        }
+
+        // Client can optionally join a room using their user/astrologer ID manually
         socket.on("join_room", (userId) => {
             socket.join(userId);
             console.log(`User/Astrologer ${userId} joined room`);

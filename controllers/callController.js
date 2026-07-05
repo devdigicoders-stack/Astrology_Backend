@@ -110,6 +110,7 @@ exports.acceptCall = async (req, res) => {
 
         // Inform user via WebSocket that call is accepted
         const io = req.app.get("io");
+        console.log(`[SOCKET EMIT] Emitting 'call_accepted' to room (userId): ${callRecord.user.toString()}`);
         io.to(callRecord.user.toString()).emit("call_accepted", { callId: callRecord._id, type: callRecord.type, message: "Astrologer accepted! Connected." });
 
         // NOTE: The frontend should now tell socket server to start the timer by calling the start_timer event.
@@ -142,6 +143,7 @@ exports.rejectCall = async (req, res) => {
 
         // Inform user via WebSocket that call is rejected
         const io = req.app.get("io");
+        console.log(`[SOCKET EMIT] Emitting 'call_rejected' to room (userId): ${callRecord.user.toString()}`);
         io.to(callRecord.user.toString()).emit("call_rejected", { message: "Astrologer rejected the call." });
 
         res.status(200).json({ success: true, message: "Call rejected successfully" });
