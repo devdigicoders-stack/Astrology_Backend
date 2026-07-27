@@ -114,6 +114,7 @@ exports.initSocket = (io) => {
         // Typing indicator
         socket.on("typing", (data) => {
             const { receiverId, isTyping, callId } = data;
+            console.log(`[SOCKET TYPING] Sender: ${socket.userId || 'Unknown'} -> Receiver: ${receiverId} | isTyping: ${isTyping} | callId: ${callId}`);
             if (receiverId) {
                 io.to(receiverId.toString()).emit("typing", {
                     senderId: socket.userId,

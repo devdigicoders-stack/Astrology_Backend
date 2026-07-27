@@ -56,6 +56,7 @@ exports.initiatePayment = async (req, res) => {
             message: "Payment initiated successfully",
             totalAmount,
             razorpayOrderId: razorpayOrder.id,
+            razorpayKeyId: process.env.RAZORPAY_KEY_ID,
             currency: razorpayOrder.currency
         });
 
